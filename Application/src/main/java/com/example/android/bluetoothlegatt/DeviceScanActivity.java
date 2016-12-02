@@ -55,7 +55,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
 import static com.example.android.bluetoothlegatt.SampleGattAttributes.BLE_NOTIFICATION;
 import static com.example.android.bluetoothlegatt.SampleGattAttributes.CHARACTERISTIC_UUID;
 import static com.example.android.bluetoothlegatt.SampleGattAttributes.SERVICE_UUID;
@@ -69,6 +68,7 @@ public class DeviceScanActivity extends ListActivity {
     private boolean scanning;
     private Handler mHandler;
     private BluetoothGattServer bluetoothGattServer;
+    public static final String TAG="device_scan_activity";
 
     private static final int REQUEST_ENABLE_BT = 1;
     private ScanCallback scanCallback=new ScanCallback() {
@@ -298,9 +298,11 @@ public class DeviceScanActivity extends ListActivity {
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
 
+            Log.i(TAG, "onConnectionStateChange: gattserver");
 
             if (newState== BluetoothProfile.STATE_CONNECTED) {
                 Log.i("GATT_SERVER", "onConnectionStateChange: CONNECTED status " + newState);
+                bluetoothGattServer.connect(device, false);
             }
             else if (newState == BluetoothProfile.STATE_DISCONNECTED)
             {
