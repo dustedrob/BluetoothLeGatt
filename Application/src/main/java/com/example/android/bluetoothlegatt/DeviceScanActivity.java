@@ -302,7 +302,10 @@ public class DeviceScanActivity extends ListActivity {
 
             if (newState== BluetoothProfile.STATE_CONNECTED) {
                 Log.i("GATT_SERVER", "onConnectionStateChange: CONNECTED status " + newState);
+                //undocumented but specified here: https://code.google.com/p/android/issues/detail?id=228432
+                //for every gatt connection there should be a matching connection performed from the server
                 bluetoothGattServer.connect(device, false);
+
             }
             else if (newState == BluetoothProfile.STATE_DISCONNECTED)
             {
