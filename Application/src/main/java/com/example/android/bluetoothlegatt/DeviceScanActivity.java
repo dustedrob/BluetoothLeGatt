@@ -32,6 +32,7 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
@@ -39,6 +40,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -54,6 +56,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.example.android.bluetoothlegatt.SampleGattAttributes.BLE_NOTIFICATION;
 import static com.example.android.bluetoothlegatt.SampleGattAttributes.CHARACTERISTIC_UUID;
@@ -234,7 +237,7 @@ public class DeviceScanActivity extends ListActivity {
     private void scanLeDevice(final boolean enable) {
         if (enable) {
             //scanning until stopped
-                    mBluetoothAdapter.getBluetoothLeScanner().startScan(null,buildScanSettings(), scanCallback);
+                    mBluetoothAdapter.getBluetoothLeScanner().startScan(buildScanFilters(),buildScanSettings(), scanCallback);
                     invalidateOptionsMenu();
             scanning = true;
 
@@ -245,6 +248,17 @@ public class DeviceScanActivity extends ListActivity {
             mBluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
         }
         invalidateOptionsMenu();
+    }
+
+    private List<ScanFilter> buildScanFilters() {
+        ScanFilter.Builder builder=new ScanFilter.Builder();
+        builder.setServiceData(new ParcelUuid(UUID.fromString("d71dbc8d-f13c-014d-2a57-95f5b0eb4b30")), "2413843681".getBytes());
+        ScanFilter build = builder.build();
+
+        List<ScanFilter> filters=new ArrayList<>();
+        filters.add(build);
+        return filters;
+
     }
 
     private void advertise(final boolean enable){
@@ -283,6 +297,21 @@ public class DeviceScanActivity extends ListActivity {
 
         else if (!enable && mBluetoothAdapter.isMultipleAdvertisementSupported() && advertising)
         {
+
+
+            List<BluetoothDevice> connectedDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
+
+            for (BluetoothDevice connectedDevice : connectedDevices) {
+                bluetoothGattServer.cancelConnection(connectedDevice);
+
+            }
+
+            List<BluetoothDevice> connectedDevices2 = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
+
+            for (BluetoothDevice connectedDevice : connectedDevices2) {
+                bluetoothGattServer.cancelConnection(connectedDevice);
+
+            }
 
                 mBluetoothAdapter.getBluetoothLeAdvertiser().stopAdvertising(advertiseCallback);
 
@@ -359,7 +388,8 @@ public class DeviceScanActivity extends ListActivity {
     private AdvertiseData buildData() {
 
         AdvertiseData.Builder builder = new AdvertiseData.Builder();
-        builder.setIncludeDeviceName(true);
+        builder.addServiceData(new ParcelUuid(UUID.fromString("d71dbc8d-f13c-014d-2a57-95f5b0eb4b30")), "2413843681".getBytes());
+
         return builder.build();
     }
 
